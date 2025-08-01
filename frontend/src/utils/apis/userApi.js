@@ -51,3 +51,15 @@ export const getProfile = () => {
 export const deleteProfile = () => {
   return axiosClient.delete('/user/deleteProfile');
 };
+
+export const login = (credentials) => {
+  return axiosClient.post('/user/login', credentials);
+};
+
+export const logout = () => {
+  return axiosClient.post('/user/logout');
+};
+
+export const checkAuth = () => {
+  return axiosClient.get('/user/check');
+};

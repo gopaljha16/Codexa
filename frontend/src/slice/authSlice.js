@@ -1,9 +1,8 @@
 
 // Import googleLogin API
-import { googleLogin as googleLoginApi, register } from '../utils/apis/userApi';
+import { googleLogin as googleLoginApi, register, login, logout, checkAuth as checkAuthApi, getProfile as getProfileApi } from '../utils/apis/userApi';
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axiosClient from '../utils/axiosClient'
 import { updateProfile as updateProfileApi } from '../utils/apis/userApi';
 
 export const registerThunk = createAsyncThunk(
@@ -22,7 +21,7 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.post("/user/login", credentials);
+      const response = await login(credentials);
       // Return user and token
       return { user: response.data.user, token: response.data.token };
     } catch (err) {
@@ -48,7 +47,7 @@ export const logutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.post("/user/logout");
+      const response = await logout();
       return response.data.user;
     } catch (err) {
       return rejectWithValue(err);
@@ -60,7 +59,7 @@ export const checkAuth = createAsyncThunk(
   "auth/check",
   async (_, { rejectWithValue }) => {//_becuase we are not sending empty no data is going to db saving something all token thing validation.
     try {
-      const response = await axiosClient.get("/user/check");
+      const response = await checkAuthApi();
       return response.data.user;
     } catch (err) {
       return rejectWithValue(err);
@@ -72,7 +71,7 @@ export const getProfile = createAsyncThunk(
   "auth/getProfile",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get("/user/getProfile");
+      const response = await getProfileApi();
       return response.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -413,7 +412,7 @@ const authSlice = createSlice({
         state.updateProfileError = action.payload;
         state.updateProfileSuccess = false;
       })
-      
+
       .addCase(registerThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -550,7 +549,7 @@ const authSlice = createSlice({
         state.changePasswordError = action.payload;
         state.changePasswordSuccess = false;
       })
-      
+
       // delete profile
       .addCase(deleteProfileThunk.pending, (state) => {
         state.deleteProfileLoading = true;

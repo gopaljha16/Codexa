@@ -37,6 +37,7 @@ import ResetPassword from "./pages/ResetPassword";
 import EmailVerification from "./components/common/EmailVerification"; // Import
 import EmailVerificationPopup from "./components/common/EmailVerificationPopup";
 import DobutAi from "./components/common/DoubtAi";
+import { initializeSocket } from "./utils/socket";
 
 const ContestLeaderboardWrapper = () => {
   const { contestId } = useParams();
@@ -48,15 +49,25 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(checkAuth())
-      .unwrap()
-      .then(() => {
+    const fetchProfile = async () => {
+      try {
+        await dispatch(checkAuth()).unwrap();
         dispatch(getProfile());
-      })
-      .catch(() => {
-        // handle error if needed
-      });
+      } catch (error) {
+        // Silently handle authentication errors
+      }
+    };
+    fetchProfile();
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        initializeSocket(token);
+      }
+    }
+  }, [isAuthenticated]);
 
   if (loading) {
     return (

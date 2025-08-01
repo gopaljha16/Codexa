@@ -15,6 +15,7 @@ import {
 } from "../slice/authSlice";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import EmailVerification from "../components/common/EmailVerification";
+import axiosClient from "../utils/axiosClient";
 
 const UserProfile = () => {
   const dispatch = useDispatch();
@@ -98,17 +99,17 @@ const UserProfile = () => {
   useEffect(() => {
     if (profile) {
       setFormData({
-        firstName: profile.user.firstName || "",
-        lastName: profile.user.lastName || "",
-        age: profile.user.age || "",
-        linkedin: profile.user.socialLinks?.linkedin || "",
-        github: profile.user.socialLinks?.github || "",
-        twitter: profile.user.socialLinks?.twitter || "",
-        website: profile.user.socialLinks?.website || "",
+        firstName: profile?.user?.firstName || "",
+        lastName: profile?.user?.lastName || "",
+        age: profile?.user?.age || "",
+        linkedin: profile?.user?.socialLinks?.linkedin || "",
+        github: profile?.user?.socialLinks?.github || "",
+        twitter: profile?.user?.socialLinks?.twitter || "",
+        website: profile?.user?.socialLinks?.website || "",
         profileImage: null,
-        profileImagePreview: profile.user.profileImage || null,
+        profileImagePreview: profile?.user?.profileImage || null,
       });
-      setEmailForVerification(profile.user.email || "");
+      setEmailForVerification(profile?.user?.email || "");
     }
   }, [profile]);
 

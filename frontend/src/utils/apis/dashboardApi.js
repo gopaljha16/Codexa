@@ -6,4 +6,5 @@ export const fetchAllProblems = () => axios.get('/problem/profile/allProblems');
 export const fetchUserStreaks = () => axios.get('/user/streaks');
 export const fetchUserBadges = () => axios.get('/user/badges');
 export const fetchUserRank = () => axios.get('/user/rank');
-export const fetchAllUserSubmissions = () => axios.get('/user/submissions'); 
+export const fetchAllUserSubmissions = () => axios.get('/user/submissions');
+export const fetchUserActivity = () => axios.get('/problem/profile/problemsSolved');

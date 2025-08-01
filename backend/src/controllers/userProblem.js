@@ -279,32 +279,41 @@ const getProfileProblemsSolved = async (req, res) => {
     try {
         const userId = req.result._id;
 
-        // Get all submissions where user solved problems
+        // Get all accepted submissions for the user
         const submissions = await Submission.find({
             userId,
             status: 'Accepted'
-        }).sort({ createdAt: -1 }); // Sort by newest first
+        }).select('problemId createdAt -_id'); // Select only necessary fields
 
-        // Get unique problem IDs from submissions
-        const problemIds = [...new Set(submissions.map(s => s.problemId))];
+        // We no longer need to fetch problem details here as we're just counting submissions per day.
+        // The frontend will receive a list of submissions with dates.
 
-        // Get problem details
-        const problems = await Problem.find({
-            _id: { $in: problemIds }
-        }).select('_id title difficulty tags');
+        // Map submissions to a simpler format for the heatmap
+        const activity = submissions.map(submission => ({
+            date: submission.createdAt, // Rename to 'date' to match frontend
+            count: 1 // Each submission counts as one activity
+        }));
 
-        // Map to include submission date
-        const solvedProblems = problems.map(problem => {
-            const submission = submissions.find(s => s.problemId.equals(problem._id));
-            return {
-                ...problem.toObject(),
-                solvedAt: submission.createdAt
-            };
-        });
+        // Aggregate counts per day, adjusting for a common +5:30 timezone offset
+        const aggregatedActivity = activity.reduce((acc, curr) => {
+            const date = new Date(curr.date);
+            // Manually adjust for a common timezone, e.g., UTC+5:30
+            // A more robust solution would use a library like moment-timezone
+            const offset = 5.5 * 60 * 60 * 1000;
+            const adjustedDate = new Date(date.getTime() + offset);
+            const dateStr = adjustedDate.toISOString().split('T')[0];
+            
+            if (!acc[dateStr]) {
+                acc[dateStr] = { date: dateStr, count: 0 };
+            }
+            acc[dateStr].count += 1;
+            return acc;
+        }, {});
 
         res.status(200).json({
-            count: solvedProblems.length,
-            problems: solvedProblems
+            count: submissions.length,
+            // The key should be 'activity' to match frontend expectations
+            activity: Object.values(aggregatedActivity)
         });
     } catch (err) {
         console.error("Error in getProfileProblemsSolved:", err);

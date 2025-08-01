@@ -56,6 +56,9 @@ const initializeSocket = (server) => {
   io.on('connection', (socket) => {
     const userName = `${socket.user.firstName} ${socket.user.lastName || ''}`.trim();
     
+    // Join a room based on userId for personal notifications
+    socket.join(socket.user._id.toString());
+
     // Join discussion room
     socket.on('join-discussion', (discussionId) => {
       socket.join(`discussion:${discussionId}`);

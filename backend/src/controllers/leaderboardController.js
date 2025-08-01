@@ -448,14 +448,16 @@ exports.getUserContestHistory = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        const contestHistory = user.contestHistory.map(history => ({
-            contestId: history.contestId._id,
-            name: history.contestId.name,
-            date: history.contestId.startTime,
-            rank: history.rank,
-            score: history.score,
-            problemsSolved: history.problemsSolved,
-        })).sort((a, b) => new Date(b.date) - new Date(a.date));
+        const contestHistory = user.contestHistory
+            .filter(history => history.contestId) // Filter out null contestIds
+            .map(history => ({
+                contestId: history.contestId._id,
+                name: history.contestId.name,
+                date: history.contestId.startTime,
+                rank: history.rank,
+                score: history.score,
+                problemsSolved: history.problemsSolved,
+            })).sort((a, b) => new Date(b.date) - new Date(a.date));
         
         res.status(200).json({
             success: true,

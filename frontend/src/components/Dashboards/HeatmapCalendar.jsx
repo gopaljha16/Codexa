@@ -6,11 +6,10 @@ const HeatmapCalendar = ({ activity }) => {
   const generateFullYearData = () => {
     const today = new Date();
     const dateMap = {};
-    
-    activity?.forEach(problem => {
-      if (!problem.solvedAt) return;
-      const dateStr = new Date(problem.solvedAt).toISOString().split('T')[0];
-      dateMap[dateStr] = (dateMap[dateStr] || 0) + 1;
+
+    activity?.forEach(item => {
+      const dateStr = new Date(item.date).toISOString().split('T')[0];
+      dateMap[dateStr] = item.count;
     });
 
     const startDate = new Date(today);

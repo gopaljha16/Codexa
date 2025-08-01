@@ -7,6 +7,7 @@ import {
   fetchUserBadges,
   fetchUserRank,
   fetchAllUserSubmissions,
+  fetchUserActivity,
 } from "../../utils/apis/dashboardApi";
 import SidebarProfileCard from "./SidebarProfileCard";
 import StatsOverview from "./StatsOverview";
@@ -31,6 +32,7 @@ const DashboardPage = () => {
     badges: [],
     rank: null,
     fullSubmissions: [],
+    activity: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,6 +49,7 @@ const DashboardPage = () => {
           badgesRes,
           rankRes,
           submissionsRes,
+          activityRes,
         ] = await Promise.all([
           dispatch(getProfile()).unwrap(), // Fetch profile first
           fetchProblemsSolved(),
@@ -55,6 +58,7 @@ const DashboardPage = () => {
           fetchUserBadges(),
           fetchUserRank(),
           fetchAllUserSubmissions(),
+          fetchUserActivity(),
         ]);
 
         setDashboardData({
@@ -80,6 +84,7 @@ const DashboardPage = () => {
           badges: badgesRes.data.badges || [],
           rank: rankRes.data,
           fullSubmissions: submissionsRes.data.submissions || [],
+          activity: activityRes.data.activity || [],
         });
       } catch (err) {
         setError(err.response?.data?.message || err.message || "Failed to fetch dashboard data");
@@ -88,22 +93,23 @@ const DashboardPage = () => {
       }
     };
 
-    fetchDashboardData(); // Call fetchDashboardData on mount
+    fetchDashboardData();
 
-    // Listen for userStatsUpdate from socket and trigger getProfile
     const io = getSocket();
+    const handleUserStatsUpdate = () => {
+      fetchDashboardData();
+    };
+
     if (io) {
-      io.on("userStatsUpdate", (data) => {
-        dispatch(getProfile()); // Trigger getProfile to refresh user data
-      });
+      io.on("userStatsUpdate", handleUserStatsUpdate);
     }
 
     return () => {
       if (io) {
-        io.off("userStatsUpdate");
+        io.off("userStatsUpdate", handleUserStatsUpdate);
       }
     };
-  }, [dispatch]); // Dependency array includes dispatch
+  }, [dispatch]);
 
   if (loading) return <LoadingSpinner fullScreen />;
   if (error) return <ErrorDisplay message={error} />;
@@ -134,13 +140,7 @@ const DashboardPage = () => {
           />
 
           {/* Heatmap Calendar */}
-          <HeatmapCalendar
-            activity={
-              dashboardData.problemsSolved?.problems
-                ? dashboardData.problemsSolved.problems
-                : []
-            }
-          />
+          <HeatmapCalendar activity={dashboardData.activity} />
 
           {/* Recent Problems Section */}
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden">

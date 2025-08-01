@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { toast } from 'react-toastify';
 import { requestEmailVerificationOTP } from '../../utils/apis/userApi';
@@ -7,7 +7,15 @@ import { X } from 'lucide-react';
 
 const EmailVerificationPopup = ({ user }) => {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const popupShown = sessionStorage.getItem('emailVerificationPopupShown');
+    if (!popupShown) {
+      setIsVisible(true);
+      sessionStorage.setItem('emailVerificationPopupShown', 'true');
+    }
+  }, []);
 
   const handleSendVerificationEmail = async () => {
     try {

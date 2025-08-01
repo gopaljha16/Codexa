@@ -405,19 +405,24 @@ function DobutAi({ problem }) {
         return;
       }
 
-      const response = await axiosClient.post(`/ai/chat`, {
-        messages: [...messages, userMessage],
-        title: problem?.title,
-        description: problem?.description,
-        testCases: problem?.visibleTestCases,
-        startCode: problem?.startCode,
-      }, {
-        responseType: 'stream'
+      const response = await fetch(`http://localhost:3000/ai/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          title: problem?.title,
+          description: problem?.description,
+          testCases: problem?.visibleTestCases,
+          startCode: problem?.startCode,
+        })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "An unknown error occurred");
+        const errorData = await response.text();
+        throw new Error(errorData || "An unknown error occurred");
       }
 
       dispatch(getProfile());

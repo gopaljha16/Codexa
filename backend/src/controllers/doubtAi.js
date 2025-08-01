@@ -23,7 +23,6 @@ const DoubtAi = async (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
-    res.setHeader("Access-Control-Allow-Origin", "*"); // for development
     res.flushHeaders();
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
