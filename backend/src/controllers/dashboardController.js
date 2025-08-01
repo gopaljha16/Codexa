@@ -68,9 +68,51 @@ const getAllUserSubmissions = async (req, res) => {
     }
 };
 
+// 5. Heatmap Data
+const getHeatmapData = async (req, res) => {
+    try {
+        const userId = req.result._id;
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+        const submissions = await Submission.aggregate([
+            {
+                $match: {
+                    userId: userId,
+                    createdAt: { $gte: oneYearAgo },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$createdAt",
+                            timezone: "Asia/Kolkata",
+                        },
+                    },
+                    count: { $sum: 1 },
+                },
+            },
+            {
+                $project: {
+                    date: "$_id",
+                    count: 1,
+                    _id: 0,
+                },
+            },
+        ]);
+
+        res.json({ submissions });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 module.exports = {
     getUserStreaks,
     getUserBadges,
     getUserRank,
     getAllUserSubmissions,
-}; 
+    getHeatmapData,
+};

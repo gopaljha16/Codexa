@@ -2,7 +2,7 @@ const Problem = require("../models/problem")
 const Submission = require("../models/submission")
 const User = require("../models/user")
 const { getLanguageById, submitToken, SubmitBatch } = require("../utils/problemUtility")
-const { getIo } = require('../config/socket');
+const { getIO } = require('../config/socket');
 
 
 
@@ -135,7 +135,7 @@ const submitCode = async (req, res) => {
                 );
                 if (updatedUser) {
                     console.log("submitCode: User problemSolved array updated successfully.");
-                    const io = getIo();
+                    const io = getIO();
                     if (io) {
                         io.to(userId.toString()).emit('userStatsUpdate', { userId });
                         console.log(`submitCode: Emitted userStatsUpdate event to user ${userId}.`);

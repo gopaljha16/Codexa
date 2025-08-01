@@ -37,17 +37,17 @@ app.use(cookieParser());
 // app.use(rateLimiter)
 
 // routing.
-app.use("/user", authRouter);
-app.use("/problem", problemRouter);
-app.use("/submission", submissionRouter)
-app.use("/ai", aiRouter)
-app.use("/video", videoRouter)
+app.use("/api/user", authRouter);
+app.use("/api/problem", problemRouter);
+app.use("/api/submission", submissionRouter)
+app.use("/api/ai", aiRouter)
+app.use("/api/video", videoRouter)
 app.use("/api/payments", payRoute);
-app.use("/api", interviewRouter);
-app.use("/contest", contestRouter)
-app.use('/playlists', playlistRouter);
-app.use('/discussions', discussionRouter);
-app.use("/dsa", dsaRouter);
+app.use("/api/ai", interviewRouter);
+app.use("/api/contest", contestRouter)
+app.use('/api/playlists', playlistRouter);
+app.use('/api/discussions', discussionRouter);
+app.use("/api/dsa", dsaRouter);
 
 const initialConnection = async () => {
     try {

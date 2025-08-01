@@ -1,53 +1,5 @@
 // api/interviewAPI.js
-import axios from 'axios';
 import axiosClient from '../axiosClient';
-
-// Create API client instance
-const apiClient = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Request interceptor for authentication and logging
-apiClient.interceptors.request.use(
-  (config) => {
-    // Add auth token if available
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    console.log('API Request:', config.method?.toUpperCase(), config.url);
-    return config;
-  },
-  (error) => {
-    console.error('Request Error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for error handling
-apiClient.interceptors.response.use(
-  (response) => {
-    console.log('API Response:', response.status, response.config.url);
-    return response;
-  },
-  (error) => {
-    console.error('API Error:', error.response?.status, error.response?.data || error.message);
-
-    // Handle common error scenarios
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('auth_token');
-      window.location.href = '/login';
-    }
-
-    return Promise.reject(error);
-  }
-);
 
 // Update createInterviewSession function
 export const createInterviewSession = async (file, candidateInfo) => {
@@ -203,7 +155,7 @@ export const interviewAPI = {
   // End interview session
   endInterview: async (sessionId) => {
     try {
-      const response = await apiClient.post('/ai/end', {
+      const response = await axiosClient.post('/ai/end', {
         sessionId,
         endTime: new Date().toISOString()
       });
@@ -223,7 +175,7 @@ export const interviewAPI = {
   // Get session status/details
   getSessionStatus: async (sessionId) => {
     try {
-      const response = await apiClient.get(`/ai/session/${sessionId}`);
+      const response = await axiosClient.get(`/ai/session/${sessionId}`);
 
       return {
         success: true,
@@ -243,7 +195,7 @@ export const interviewAPI = {
       const formData = new FormData();
       formData.append('resume', file);
 
-      const response = await apiClient.post('/ai/upload-resume', formData, {
+      const response = await axiosClient.post('/ai/upload-resume', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -267,7 +219,7 @@ export const interviewAPI = {
   // Get interview feedback
   getFeedback: async (sessionId) => {
     try {
-      const response = await apiClient.get(`/ai/feedback/${sessionId}`);
+      const response = await axiosClient.get(`/ai/feedback/${sessionId}`);
 
       // Check if the response contains the expected data structure
       if (response.data && response.data.success) {
@@ -296,7 +248,7 @@ export const interviewAPI = {
   // Generate feedback for a session (useful if feedback wasn't generated automatically)
   generateFeedback: async (sessionId) => {
     try {
-      const response = await apiClient.post(`/ai/generate-feedback/${sessionId}`);
+      const response = await axiosClient.post(`/ai/generate-feedback/${sessionId}`);
       
       if (response.data && response.data.success) {
         return {
@@ -327,7 +279,7 @@ export const interviewAPI = {
       formData.append('recording', audioBlob, 'interview-recording.wav');
       formData.append('sessionId', sessionId);
 
-      const response = await apiClient.post('/interview/save-recording', formData, {
+      const response = await axiosClient.post('/interview/save-recording', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }
@@ -490,22 +442,6 @@ export const handleAPIError = (error) => {
       status: -1,
       details: error
     };
-  }
-};
-
-// Configuration for different environments
-export const apiConfig = {
-  development: {
-    baseURL: 'http://localhost:3001/api',
-    timeout: 30000
-  },
-  production: {
-    baseURL: 'https://your-api-domain.com/api',
-    timeout: 30000
-  },
-  staging: {
-    baseURL: 'https://staging-api-domain.com/api',
-    timeout: 30000
   }
 };
 

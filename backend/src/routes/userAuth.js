@@ -38,6 +38,7 @@ authRouter.get("/streaks", userMiddleware, dashboardController.getUserStreaks);
 authRouter.get("/badges", userMiddleware, dashboardController.getUserBadges);
 authRouter.get("/rank", userMiddleware, dashboardController.getUserRank);
 authRouter.get("/submissions", userMiddleware, dashboardController.getAllUserSubmissions);
+authRouter.get("/heatmap", userMiddleware, dashboardController.getHeatmapData);
 
 // check auth for user enters the website for checking the user is registered or if register then redirect to home page not then login/signup page
 //so here token checking

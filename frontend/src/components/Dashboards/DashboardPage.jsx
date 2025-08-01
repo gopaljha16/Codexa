@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   fetchUserProfile,
   fetchProblemsSolved,
@@ -7,7 +7,7 @@ import {
   fetchUserBadges,
   fetchUserRank,
   fetchAllUserSubmissions,
-  fetchUserActivity,
+  fetchHeatmapData,
 } from "../../utils/apis/dashboardApi";
 import SidebarProfileCard from "./SidebarProfileCard";
 import StatsOverview from "./StatsOverview";
@@ -37,79 +37,81 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      try {
-        const [
-          profileRes,
-          solvedRes,
-          allRes,
-          streaksRes, // Keep streaksRes for maxStreak if needed
-          badgesRes,
-          rankRes,
-          submissionsRes,
-          activityRes,
-        ] = await Promise.all([
-          dispatch(getProfile()).unwrap(), // Fetch profile first
-          fetchProblemsSolved(),
-          fetchAllProblems(),
-          fetchUserStreaks(), // Fetch streaks separately for maxStreak
-          fetchUserBadges(),
-          fetchUserRank(),
-          fetchAllUserSubmissions(),
-          fetchUserActivity(),
-        ]);
+  const fetchDashboardData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [
+        profileRes,
+        solvedRes,
+        allRes,
+        streaksRes,
+        badgesRes,
+        rankRes,
+        submissionsRes,
+        activityRes,
+      ] = await Promise.all([
+        dispatch(getProfile()).unwrap(),
+        fetchProblemsSolved(),
+        fetchAllProblems(),
+        fetchUserStreaks(),
+        fetchUserBadges(),
+        fetchUserRank(),
+        fetchAllUserSubmissions(),
+        fetchHeatmapData(),
+      ]);
 
-        setDashboardData({
-          user: {
-            ...profileRes.user, // Use user from getProfile response
-            rank: rankRes.data.rank,
-          },
-          problemsSolved: solvedRes.data,
-          allProblems: {
-            totalProblems: allRes.data.totalProblems,
-            solvedCount: allRes.data.solvedCount,
-            unsolvedCount: allRes.data.unsolvedCount,
-            easy: allRes.data.easy,
-            medium: allRes.data.medium,
-            hard: allRes.data.hard,
-            attempting: allRes.data.attempting,
-            problems: allRes.data.problems || [],
-          },
-          streaks: {
-            currentStreak: profileRes.user?.streak ?? 0, // Use streak from getProfile response
-            maxStreak: streaksRes.data?.maxStreak ?? 0, // Use maxStreak from fetchUserStreaks
-          },
-          badges: badgesRes.data.badges || [],
-          rank: rankRes.data,
-          fullSubmissions: submissionsRes.data.submissions || [],
-          activity: activityRes.data.activity || [],
-        });
-      } catch (err) {
-        setError(err.response?.data?.message || err.message || "Failed to fetch dashboard data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-
-    const io = getSocket();
-    const handleUserStatsUpdate = () => {
-      fetchDashboardData();
-    };
-
-    if (io) {
-      io.on("userStatsUpdate", handleUserStatsUpdate);
+      setDashboardData({
+        user: { ...profileRes.user, rank: rankRes.data.rank },
+        problemsSolved: solvedRes.data,
+        allProblems: {
+          totalProblems: allRes.data.totalProblems,
+          solvedCount: allRes.data.solvedCount,
+          unsolvedCount: allRes.data.unsolvedCount,
+          easy: allRes.data.easy,
+          medium: allRes.data.medium,
+          hard: allRes.data.hard,
+          attempting: allRes.data.attempting,
+          problems: allRes.data.problems || [],
+        },
+        streaks: {
+          currentStreak: profileRes.user?.streak ?? 0,
+          maxStreak: streaksRes.data?.maxStreak ?? 0,
+        },
+        badges: badgesRes.data.badges || [],
+        rank: rankRes.data,
+        fullSubmissions: submissionsRes.data.submissions || [],
+        activity: activityRes.data.submissions || [],
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || "Failed to fetch dashboard data");
+    } finally {
+      setLoading(false);
     }
-
-    return () => {
-      if (io) {
-        io.off("userStatsUpdate", handleUserStatsUpdate);
-      }
-    };
   }, [dispatch]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  useEffect(() => {
+    if (!authUser) return; // Don't run if user is not authenticated
+
+    const socket = getSocket();
+    if (socket) {
+      const handleUserStatsUpdate = (data) => {
+        console.log("Received userStatsUpdate event, refetching data:", data);
+        fetchDashboardData();
+      };
+
+      socket.on("userStatsUpdate", handleUserStatsUpdate);
+      console.log("Socket listener for 'userStatsUpdate' attached.");
+
+      return () => {
+        socket.off("userStatsUpdate", handleUserStatsUpdate);
+        console.log("Socket listener for 'userStatsUpdate' removed.");
+      };
+    }
+  }, [authUser, fetchDashboardData]);
 
   if (loading) return <LoadingSpinner fullScreen />;
   if (error) return <ErrorDisplay message={error} />;

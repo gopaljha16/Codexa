@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logutUser } from "../../slice/authSlice";
+import axiosClient from "../../utils/axiosClient";
 import "./AiAssistant.css";
 
 const AiAssistant = () => {
@@ -93,27 +94,6 @@ const AiAssistant = () => {
         },
         responseType: 'stream'
       });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              text: "Your session has expired. Please log in again.",
-              sender: "ai",
-            },
-          ]);
-          dispatch(logutUser());
-          setTimeout(() => navigate("/login"), 2000);
-        } else {
-          const errorText = await response.text();
-          console.error("API Error:", errorText);
-          throw new Error(`API request failed with status ${response.status}`);
-        }
-        setIsLoading(false);
-        setIsTyping(false);
-        return;
-      }
       
       let fullResponse = "";
       let aiMessageIndex = -1;
@@ -124,7 +104,7 @@ const AiAssistant = () => {
         return newMessages;
       });
 
-      const reader = response.body.getReader();
+      const reader = response.data.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
 
@@ -224,13 +204,25 @@ const AiAssistant = () => {
 
     } catch (error) {
       console.error("Error sending message:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          text: "🚫 Failed to send message. Please check your connection and try again.",
-          sender: "ai",
-        },
-      ]);
+      if (error.response && error.response.status === 401) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            text: "Your session has expired. Please log in again.",
+            sender: "ai",
+          },
+        ]);
+        dispatch(logutUser());
+        setTimeout(() => navigate("/login"), 2000);
+      } else {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            text: "🚫 Failed to send message. Please check your connection and try again.",
+            sender: "ai",
+          },
+        ]);
+      }
       setIsLoading(false);
       setIsTyping(false);
     }

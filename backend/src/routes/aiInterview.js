@@ -9,6 +9,9 @@ const {
   getFeedback,
   saveRecording
 } = require("../controllers/interview");
+const DoubtAi = require("../controllers/doubtAi");
+const { handleAssistantQuery } = require("../controllers/aiAssistantController");
+const { userMiddleware, checkPremiumAndTokens } = require("../middleware/userMiddleware");
 
 const interviewRouter = express.Router();
 
@@ -53,18 +56,20 @@ const asyncHandler = (fn) => (req, res, next) => {
 };
 
 // Routes with error handling
-interviewRouter.post("/ai/create-session", asyncHandler(createSession));
-interviewRouter.post("/ai/continue", asyncHandler(continueInterview));
-interviewRouter.post("/ai/end", asyncHandler(endInterview));
-interviewRouter.get("/ai/session/:sessionId", asyncHandler(getSessionStatus));
+interviewRouter.post("/create-session", asyncHandler(createSession));
+interviewRouter.post("/continue", asyncHandler(continueInterview));
+interviewRouter.post("/end", asyncHandler(endInterview));
+interviewRouter.get("/session/:sessionId", asyncHandler(getSessionStatus));
+interviewRouter.post("/chat", userMiddleware, checkPremiumAndTokens, DoubtAi);
+interviewRouter.get("/assistant", userMiddleware, handleAssistantQuery);
 
 // File upload routes with error handling
-interviewRouter.post("/ai/upload-resume", upload.single('resume'), handleMulterError, asyncHandler(uploadResume));
+interviewRouter.post("/upload-resume", upload.single('resume'), handleMulterError, asyncHandler(uploadResume));
 
 // Feedback routes
-interviewRouter.get("/ai/feedback/:sessionId", asyncHandler(getFeedback));
+interviewRouter.get("/feedback/:sessionId", asyncHandler(getFeedback));
 // Route to manually generate feedback for a session (useful for testing or regenerating feedback)
-interviewRouter.post("/ai/generate-feedback/:sessionId", asyncHandler(async (req, res) => {
+interviewRouter.post("/generate-feedback/:sessionId", asyncHandler(async (req, res) => {
   try {
     const { sessionId } = req.params;
     

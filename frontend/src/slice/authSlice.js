@@ -379,7 +379,8 @@ const authSlice = createSlice({
       })
       .addCase(getProfile.fulfilled, (state, action) => {
         state.profileLoading = false;
-        state.profile = action.payload;
+        // The payload is the full user object, so we can set it directly
+        state.profile = action.payload.user;
         state.user = {
           ...state.user,
           ...action.payload.user,
