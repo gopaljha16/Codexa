@@ -379,11 +379,11 @@ const authSlice = createSlice({
       })
       .addCase(getProfile.fulfilled, (state, action) => {
         state.profileLoading = false;
-        // The payload is the full user object, so we can set it directly
         state.profile = action.payload.user;
         state.user = {
           ...state.user,
           ...action.payload.user,
+          emailId: action.payload.user.emailId,
           paymentHistory: action.payload.user.paymentHistory || [],
         };
       })
@@ -402,10 +402,10 @@ const authSlice = createSlice({
         state.updateProfileLoading = false;
         state.updateProfileSuccess = true;
         state.profile = action.payload.user;
-        // Update user info as well to ensure Navbar re-renders
         state.user = {
           ...state.user,
-          ...action.payload.user
+          ...action.payload.user,
+          emailId: action.payload.user.emailId,
         };
       })
       .addCase(updateProfile.rejected, (state, action) => {

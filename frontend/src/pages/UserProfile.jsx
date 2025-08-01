@@ -57,7 +57,7 @@ const UserProfile = () => {
   const [showEmailVerification, setShowEmailVerification] = useState(false);
 
   useEffect(() => {
-    if (profile?.user?.emailVerified) {
+    if (profile?.emailVerified) {
       setShowEmailVerification(false);
     }
   }, [profile]);
@@ -99,17 +99,17 @@ const UserProfile = () => {
   useEffect(() => {
     if (profile) {
       setFormData({
-        firstName: profile?.user?.firstName || "",
-        lastName: profile?.user?.lastName || "",
-        age: profile?.user?.age || "",
-        linkedin: profile?.user?.socialLinks?.linkedin || "",
-        github: profile?.user?.socialLinks?.github || "",
-        twitter: profile?.user?.socialLinks?.twitter || "",
-        website: profile?.user?.socialLinks?.website || "",
+        firstName: profile?.firstName || "",
+        lastName: profile?.lastName || "",
+        age: profile?.age || "",
+        linkedin: profile?.socialLinks?.linkedin || "",
+        github: profile?.socialLinks?.github || "",
+        twitter: profile?.socialLinks?.twitter || "",
+        website: profile?.socialLinks?.website || "",
         profileImage: null,
-        profileImagePreview: profile?.user?.profileImage || null,
+        profileImagePreview: profile?.profileImage || null,
       });
-      setEmailForVerification(profile?.user?.email || "");
+      setEmailForVerification(profile?.emailId || "");
     }
   }, [profile]);
 
@@ -153,7 +153,7 @@ const UserProfile = () => {
   }, [verifyEmailOTPSuccess, dispatch, navigate]);
 
   useEffect(() => {
-    if (profile?.user?.emailVerified) {
+    if (profile?.emailVerified) {
       setShowEmailVerification(false);
     }
   }, [profile]);
@@ -495,7 +495,7 @@ const UserProfile = () => {
                 )}
 
                 {/* Current Image Info */}
-                {profile?.user?.profileImage && (
+                {profile?.profileImage && (
                   <div className="mt-4 p-3 bg-gray-700/50 rounded-lg">
                     <p className="text-xs text-gray-400 text-center">
                       Current image will be replaced if you upload a new one
@@ -735,7 +735,7 @@ const UserProfile = () => {
                 <span className="mr-2">✉️</span>
                 Email Verification
               </h3>
-              {profile?.user?.emailVerified ? (
+              {profile?.emailVerified ? (
                 <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-full flex items-center">
                   <span className="mr-1">✓</span> Verified
                 </span>
@@ -749,7 +749,7 @@ const UserProfile = () => {
               )}
             </div>
 
-            {!profile?.user?.emailVerified && showEmailVerification && (
+            {!profile?.emailVerified && showEmailVerification && (
               <EmailVerification
                 email={emailForVerification}
                 onVerified={handleEmailVerified}
@@ -937,20 +937,20 @@ const UserProfile = () => {
                   <div className="mb-3">
                     <span
                       className={`text-sm ${
-                        profile?.user?.emailVerified
+                        profile?.emailVerified
                           ? "text-green-400"
                           : "text-yellow-400"
                       }`}
                     >
-                      {profile?.user?.emailVerified ? (
+                      {profile?.emailVerified ? (
                         <span className="flex items-center">
                           <span className="mr-1">✓</span> Verified Email:{" "}
-                          {profile?.user?.email}
+                          {profile?.emailId}
                         </span>
                       ) : (
                         <span className="flex items-center">
                           <span className="mr-1">⚠️</span> Email not verified:{" "}
-                          {profile?.user?.email}
+                          {profile?.emailId}
                         </span>
                       )}
                     </span>
@@ -1021,7 +1021,7 @@ const UserProfile = () => {
                 </div>
                 <div>
                   <div className="text-gray-400 text-sm">Contest Streak</div>
-                  <div className="text-white text-2xl font-bold">{profile?.user?.streak || 0}</div>
+                  <div className="text-white text-2xl font-bold">{profile?.streak || 0}</div>
                 </div>
               </div>
               <div className="bg-gray-700/50 p-4 rounded-xl flex items-center">
@@ -1030,7 +1030,7 @@ const UserProfile = () => {
                 </div>
                 <div>
                   <div className="text-gray-400 text-sm">Contests Completed</div>
-                  <div className="text-white text-2xl font-bold">{profile?.user?.contestsCompleted?.length || 0}</div>
+                  <div className="text-white text-2xl font-bold">{profile?.contestsCompleted?.length || 0}</div>
                 </div>
               </div>
             </div>

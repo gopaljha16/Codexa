@@ -52,7 +52,7 @@ const PremiumDashboard = () => {
                 Use your personal API token to integrate Codexa with your applications.
               </p>
               <div className="mt-4 p-4 bg-slate-900 rounded-lg font-mono text-sm text-green-400 break-all border border-slate-700">
-                {profile?.user?.apiToken || 'No API token found.'}
+                {profile?.apiToken || 'No API token found.'}
               </div>
               <button className="mt-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
                 Generate New Token
@@ -70,7 +70,7 @@ const PremiumDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-slate-900 p-6 rounded-lg border border-slate-700">
                   <p className="text-slate-400 text-sm">AI Doubt Tokens</p>
-                  <p className="text-3xl font-bold text-blue-400">{profile?.user?.tokensLeft}</p>
+                  <p className="text-3xl font-bold text-blue-400">{profile?.tokensLeft}</p>
                   <p className="text-slate-500 text-xs mt-1">tokens remaining</p>
                 </div>
                 <div className="bg-slate-900 p-6 rounded-lg border border-slate-700">
