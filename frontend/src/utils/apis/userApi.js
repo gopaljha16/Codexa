@@ -8,6 +8,10 @@ export const updateProfile = (formData) => {
   });
 };
 
+export const register = (data) => {
+  return axiosClient.post('/user/register', data);
+};
+
 export const googleLogin = (token) => {
   return axiosClient.post('/user/googleLogin', { token });
 };

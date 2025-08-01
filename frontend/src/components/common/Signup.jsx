@@ -5,13 +5,12 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  registerThunk,
   resetEmailVerificationState,
-  signupWithVerificationThunk,
   verifySignupOTPThunk,
 } from "../../slice/authSlice";
 import { toast } from "react-toastify";
 import { EyeOff, Eye, ArrowLeft } from "lucide-react";
-import EmailVerification from "./EmailVerification";
 
 const signupSchema = z
   .object({
@@ -32,11 +31,8 @@ const signupSchema = z
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showVerification, setShowVerification] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState("");
   const dispatch = useDispatch();
-  const { isAuthenticated, loading, error, verifySignupOTPSuccess } =
-    useSelector((state) => state.auth);
+  const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const {
@@ -51,22 +47,12 @@ const Signup = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  useEffect(() => {
-    if (verifySignupOTPSuccess) {
-      toast.success("Email verified successfully. Redirecting to homepage.");
-      setShowVerification(false);
-      dispatch(resetEmailVerificationState());
-      navigate("/"); // Redirect to homepage after successful verification
-    }
-  }, [verifySignupOTPSuccess, dispatch, navigate]);
-
   const onSubmit = async (data) => {
     try {
-      const resultAction = await dispatch(signupWithVerificationThunk(data));
-      if (signupWithVerificationThunk.fulfilled.match(resultAction)) {
-        toast.success(resultAction.payload.message);
-        setRegisteredEmail(data.emailId);
-        setShowVerification(true);
+      const resultAction = await dispatch(registerThunk(data));
+      if (registerThunk.fulfilled.match(resultAction)) {
+        toast.success("Registration successful! Redirecting to login.");
+        navigate("/login");
       } else {
         const errorMsg =
           resultAction.payload?.message || "Registration failed.";
@@ -76,15 +62,6 @@ const Signup = () => {
       toast.error("An unexpected error occurred.");
     }
   };
-
-  if (showVerification) {
-    return (
-      <EmailVerification
-        email={registeredEmail}
-        // onVerified prop is no longer needed as verifySignupOTPThunk handles login and redirect
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative">

@@ -36,7 +36,56 @@ const upload = multer({
     }
 }).single("profileImage");
 
-// Removed the 'register' function as signupWithVerification is now the primary registration method.
+const register = async (req, res) => {
+    try {
+        const { firstName, emailId, password, confirmPassword } = req.body;
+
+        // Validate inputs
+        if (!firstName || !emailId || !password || !confirmPassword) {
+            return res.status(400).json({ success: false, message: 'All fields are required' });
+        }
+        if (password !== confirmPassword) {
+            return res.status(400).json({ success: false, message: 'Passwords do not match' });
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ emailId: emailId.toLowerCase() });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'User with this email already exists' });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const newUser = new User({
+            firstName,
+            emailId: emailId.toLowerCase(),
+            password: hashedPassword,
+            emailVerified: false, // Set emailVerified to false
+        });
+
+        await newUser.save();
+
+        // Generate JWT token
+        const token = jwt.sign({ _id: newUser._id, emailId: newUser.emailId, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: 604800 });
+        res.cookie("token", token, { maxAge: 604800000, httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
+
+        res.status(201).json({
+            success: true,
+            message: 'User registered successfully. Please verify your email.',
+            user: {
+                _id: newUser._id,
+                firstName: newUser.firstName,
+                emailId: newUser.emailId,
+                emailVerified: newUser.emailVerified,
+            },
+            token,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
 
 const login = async (req, res) => {
     try {
@@ -316,6 +365,7 @@ const googleLogin = async (req, res) => {
 
 
 module.exports = {
+    register,
     login,
     logout,
     getProfile,

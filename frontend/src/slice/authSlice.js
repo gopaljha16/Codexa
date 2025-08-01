@@ -1,12 +1,22 @@
 
 // Import googleLogin API
-import { googleLogin as googleLoginApi } from '../utils/apis/userApi';
+import { googleLogin as googleLoginApi, register } from '../utils/apis/userApi';
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axiosClient from '../utils/axiosClient'
 import { updateProfile as updateProfileApi } from '../utils/apis/userApi';
 
-// api's
+export const registerThunk = createAsyncThunk(
+  "auth/register",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await register(userData);
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 
 export const loginUser = createAsyncThunk(
   "auth/login",
@@ -382,6 +392,23 @@ const authSlice = createSlice({
         state.updateProfileLoading = false;
         state.updateProfileError = action.payload;
         state.updateProfileSuccess = false;
+      })
+      
+      .addCase(registerThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        localStorage.setItem('authToken', action.payload.token);
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
+      })
+      .addCase(registerThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Registration failed";
       })
 
       // signupWithVerification

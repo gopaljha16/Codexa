@@ -318,13 +318,18 @@ const UserProfile = () => {
 
   const handleRequestVerificationOTP = () => {
     if (!emailForVerification) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        email: "Email is required",
-      }));
+      toast.error("Email is not available for verification.");
       return;
     }
-    dispatch(requestEmailVerificationOTPThunk(emailForVerification));
+    dispatch(requestEmailVerificationOTPThunk(emailForVerification))
+      .unwrap()
+      .then(() => {
+        toast.success("Verification OTP sent to your email.");
+        setShowEmailVerification(true);
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to send OTP. Please try again.");
+      });
   };
 
   const handleVerifyEmail = () => {
@@ -719,9 +724,7 @@ const UserProfile = () => {
                 </span>
               ) : (
                 <button
-                  onClick={() =>
-                    setShowEmailVerification(!showEmailVerification)
-                  }
+                  onClick={() => setShowEmailVerification(!showEmailVerification)}
                   className="px-3 py-1 bg-orange-500/20 text-orange-400 text-sm rounded-full hover:bg-orange-500/30 transition-colors"
                 >
                   {showEmailVerification ? "Hide" : "Verify Email"}

@@ -34,7 +34,8 @@ import { ContestProvider } from "./context/ContestContext";
 import { DSAVisualizer } from "./pages/DSAVisualizer";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import EmailVerification from "./components/common/EmailVerification"; // Import 
+import EmailVerification from "./components/common/EmailVerification"; // Import
+import EmailVerificationPopup from "./components/common/EmailVerificationPopup";
 import DobutAi from "./components/common/DoubtAi";
 
 const ContestLeaderboardWrapper = () => {
@@ -68,6 +69,7 @@ const App = () => {
   return (
     <>
       <div>
+        {isAuthenticated && user && !user.emailVerified && <EmailVerificationPopup user={user} />}
         <ContestProvider>
           <Routes>
             <Route path="/" element={<Homepage />} />
