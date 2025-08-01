@@ -28,8 +28,8 @@ const cron = require("node-cron");
 const PORT_NO = process.env.PORT_NO;
 
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true 
+  origin: ['http://localhost:5173', 'https://codexa.live'],
+  credentials: true
 }))
 
 app.use(express.json());
