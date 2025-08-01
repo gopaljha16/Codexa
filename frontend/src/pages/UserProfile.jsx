@@ -7,13 +7,13 @@ import {
   getProfile,
   updateProfile,
   resetUpdateProfileState,
-  signupWithVerificationThunk,
-  verifySignupOTPThunk,
+  deleteProfileThunk,
+  resetDeleteProfileState,
   changePasswordThunk,
   resetEmailVerificationState,
   resetChangePasswordState,
 } from "../slice/authSlice";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
 import EmailVerification from "../components/common/EmailVerification";
 
 const UserProfile = () => {
@@ -34,9 +34,13 @@ const UserProfile = () => {
     changePasswordLoading,
     changePasswordError,
     changePasswordSuccess,
+    deleteProfileLoading,
+    deleteProfileError,
+    deleteProfileSuccess,
     user,
   } = useSelector((state) => state.auth);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -351,6 +355,18 @@ const UserProfile = () => {
   const handleEmailVerified = () => {
     dispatch(getProfile());
     setShowEmailVerification(false);
+  };
+
+  const handleDeleteAccount = () => {
+    dispatch(deleteProfileThunk())
+      .unwrap()
+      .then(() => {
+        toast.success("Account deleted successfully.");
+        navigate("/");
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to delete account.");
+      });
   };
 
   if (profileLoading) {
@@ -854,6 +870,23 @@ const UserProfile = () => {
             )}
           </div>
 
+          {/* Delete Account Section */}
+          <div className="bg-gradient-to-br from-red-900/50 to-red-800/50 rounded-2xl p-6 border border-red-500/50 shadow-2xl">
+            <h3 className="text-xl font-semibold text-red-400 mb-4 flex items-center">
+              <ShieldAlert className="mr-2" />
+              Delete Account
+            </h3>
+            <p className="text-gray-400 mb-4">
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              Delete My Account
+            </button>
+          </div>
+
           {/* Profile Preview Section */}
           {(formData.firstName ||
             formData.lastName ||
@@ -1038,6 +1071,31 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-slate-800 rounded-lg p-8 shadow-2xl max-w-md w-full">
+            <h2 className="text-2xl font-bold text-red-400 mb-4">Are you sure?</h2>
+            <p className="text-gray-300 mb-6">
+              This action is irreversible. All your data, including submissions and profile information, will be permanently deleted.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteProfileLoading}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
+              >
+                {deleteProfileLoading ? "Deleting..." : "Delete Account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

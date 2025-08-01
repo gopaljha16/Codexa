@@ -193,6 +193,18 @@ export const changePasswordThunk = createAsyncThunk(
   }
 );
 
+export const deleteProfileThunk = createAsyncThunk(
+  "auth/deleteProfile",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await deleteProfile();
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 //slice
 const authSlice = createSlice({
   name: "auth",
@@ -227,8 +239,16 @@ const authSlice = createSlice({
     changePasswordLoading: false,
     changePasswordError: null,
     changePasswordSuccess: false,
+    deleteProfileLoading: false,
+    deleteProfileError: null,
+    deleteProfileSuccess: false,
   },
   reducers: {
+    resetDeleteProfileState: (state) => {
+      state.deleteProfileLoading = false;
+      state.deleteProfileError = null;
+      state.deleteProfileSuccess = false;
+    },
     resetUpdateProfileState: (state) => {
       state.updateProfileLoading = false;
       state.updateProfileError = null;
@@ -529,12 +549,33 @@ const authSlice = createSlice({
         state.changePasswordLoading = false;
         state.changePasswordError = action.payload;
         state.changePasswordSuccess = false;
+      })
+      
+      // delete profile
+      .addCase(deleteProfileThunk.pending, (state) => {
+        state.deleteProfileLoading = true;
+        state.deleteProfileError = null;
+        state.deleteProfileSuccess = false;
+      })
+      .addCase(deleteProfileThunk.fulfilled, (state) => {
+        state.deleteProfileLoading = false;
+        state.deleteProfileSuccess = true;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("user");
+      })
+      .addCase(deleteProfileThunk.rejected, (state, action) => {
+        state.deleteProfileLoading = false;
+        state.deleteProfileError = action.payload;
+        state.deleteProfileSuccess = false;
       });
   }
 })
 
 
 
-export const { resetUpdateProfileState, resetEmailVerificationState, resetPasswordResetState, resetChangePasswordState, setUserStats, updateTokens } = authSlice.actions;
+export const { resetUpdateProfileState, resetEmailVerificationState, resetPasswordResetState, resetChangePasswordState, setUserStats, updateTokens, resetDeleteProfileState } = authSlice.actions;
 
 export default authSlice.reducer;

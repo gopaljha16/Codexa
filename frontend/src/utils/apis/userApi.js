@@ -47,3 +47,7 @@ export const changePassword = (oldPassword, newPassword) => {
 export const getProfile = () => {
   return axiosClient.get('/user/getProfile');
 };
+
+export const deleteProfile = () => {
+  return axiosClient.delete('/user/deleteProfile');
+};
