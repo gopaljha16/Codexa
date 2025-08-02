@@ -145,7 +145,7 @@ Feel free to use, modify, and distribute with proper credit.
 
 ---
 
-> Made with ❤️ by the **Codexa** Team
+> Made with ❤️ by the **Codexa** 
 
 ---
 
