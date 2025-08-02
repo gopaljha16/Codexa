@@ -71,14 +71,14 @@ const saveVideoMetadata = async (req, res) => {
     }
 
     //  Properly generate a thumbnail URL
-    const thumbnailUrl = cloudinary.url(`${cloudinaryPublicId}.jpg`, {
+    const thumbnailUrl = cloudinary.url(cloudinaryPublicId, {
       resource_type: "video",
-      format: "jpg",
       transformation: [
         { width: 400, height: 225, crop: "fill" },
         { quality: "auto" },
-        { start_offset: "auto" },
+        { start_offset: 1 },
       ],
+      fetch_format: "jpg",
     });
 
     const videoSolution = await SolutionVideo.create({

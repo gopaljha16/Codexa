@@ -17,7 +17,33 @@ const ProblemSchema = new Schema({
     },
     tags: {
         type: [String],
-        enum: ["array", "linkedList", "graph", "dp", "function", "stack" , "string", "number manipulation", "tree", "binary search", "greedy", "sorting", "searching" , "loop", "recursion", "bit manipulation", "hashing", "dynamic programming", "backtracking", "combinatorics", "geometry", "bitwise operations", "game theory", "number theory", "combinatorial optimization", "probability", "data structures", "algorithms", "optimization", "parallel processing", "distributed systems", "networking", "security", "cryptography", "machine learning", "artificial intelligence", "natural language processing", "computer vision", "deep learning", "reinforcement learning", "string" , "hashmap" , "math" , "searching", "queue", "heap", "priority queue", "binary tree", "binary search tree", "AVL tree", "red-black tree", "B-tree", "segment tree", "Fenwick tree", "trie", "disjoint set union" ,"data structure", "set", "sliding window", "expand around center", "two pointers"],
+        enum: [
+            // Core Concepts
+            "array", "string", "linkedList", "stack", "queue", "hashmap", "set", "tree", "graph",
+            "binary search", "binary tree", "binary search tree",
+
+            // Algorithms
+            "sorting", "searching", "recursion", "backtracking", "greedy", "dynamic programming", "dp",
+            "two pointers", "sliding window", "expand around center",
+
+            // Advanced Data Structures
+            "heap", "priority queue", "AVL tree", "red-black tree", "B-tree",
+            "segment tree", "Fenwick tree", "trie", "disjoint set union",
+
+            // Bit Manipulation
+            "bit manipulation", "bitwise operations",
+
+            // Math & Number Theory
+            "math", "number manipulation", "number theory", "geometry", "combinatorics", "probability",
+
+            // Paradigms & Techniques
+            "function", "loop", "hashing", "combinatorial optimization", "game theory",
+
+            // Broader Fields (use with caution)
+            "data structures", "algorithms", "optimization", "machine learning", "artificial intelligence",
+            "natural language processing", "computer vision", "deep learning", "reinforcement learning",
+            "networking", "security", "cryptography", "parallel processing", "distributed systems", "conditional", "condition", "digits", "parsing", "explanation"
+        ],
         required: true
     },
     visibleTestCases: [
@@ -94,7 +120,7 @@ const ProblemSchema = new Schema({
         ref: "user",
         required: true,
     }
-}, {Timestamp:true})
+}, { timestamps: true })
 
 const Problem = mongoose.model("problem", ProblemSchema);
 module.exports = Problem;

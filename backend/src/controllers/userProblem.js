@@ -40,9 +40,26 @@ const createProblem = async (req, res) => {
             console.log(testResult)
 
             // check the test cases
-            for (const test of testResult) {
-                if (test.status_id != 3)
-                    return res.status(400).send("Error Occured Status_code is not equal to 3 ");
+            for (let i = 0; i < testResult.length; i++) {
+                const test = testResult[i];
+                if (test.status_id !== 3) {
+                    const failedTestCase = visibleTestCases[i];
+                    return res.status(400).json({
+                        message: `Reference solution for ${language} failed on a visible test case.`,
+                        details: {
+                            language,
+                            testCase: {
+                                input: failedTestCase.input,
+                                expectedOutput: failedTestCase.output,
+                            },
+                            result: {
+                                status: test.status,
+                                stdout: test.stdout,
+                                stderr: test.stderr,
+                            },
+                        },
+                    });
+                }
             }
         }
 

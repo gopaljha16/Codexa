@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import Editor from "@monaco-editor/react";
 import { useParams, NavLink } from "react-router-dom";
@@ -95,41 +95,36 @@ const ProblemPage = () => {
   };
 
   // Fetch problem data
-  useEffect(() => {
-    const fetchProblem = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosClient.get(
-          `/problem/getProblemById/${problemId}`
-        );
-
-        const initialCode =
-          response.data.startCode.find((sc) => {
-            const backendLang = sc.language.toLowerCase();
-            if (selectedLanguage === "cpp") {
-              return backendLang === "cpp" || backendLang === "c++";
-            }
-            return backendLang === selectedLanguage;
-          })?.initialCode || "";
-
-        setProblem(response.data);
-        setCode(initialCode);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching problem:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchProblem();
+  const fetchProblem = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axiosClient.get(
+        `/problem/getProblemById/${problemId}`
+      );
+      setProblem(response.data);
+    } catch (error) {
+      console.error("Error fetching problem:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [problemId]);
+
+  useEffect(() => {
+    fetchProblem();
+
+    window.addEventListener("focus", fetchProblem);
+
+    return () => {
+      window.removeEventListener("focus", fetchProblem);
+    };
+  }, [fetchProblem]);
 
   // Update code when language changes
   useEffect(() => {
-    if (problem) {
+    if (problem && problem?.startCode && problem?.startCode.length > 0) {
       const initialCode =
         problem.startCode.find((sc) => {
-          const backendLang = sc.language.toLowerCase();
+          const backendLang = sc.language.toLowerCase().trim();
           if (selectedLanguage === "cpp") {
             return backendLang === "cpp" || backendLang === "c++";
           }

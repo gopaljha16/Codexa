@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers } from '../../utils/apis/adminApi';
+import { getAllUsers, updateAllUsersProfileImages } from '../../utils/apis/adminApi';
 import { motion } from 'framer-motion';
 import { FiSearch, FiXCircle } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
@@ -10,19 +10,22 @@ const UserManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [updateMessage, setUpdateMessage] = useState('');
+
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            const data = await getAllUsers();
+            setUsers(data.users);
+            setFilteredUsers(data.users);
+        } catch (err) {
+            setError('Failed to fetch users');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const data = await getAllUsers();
-                setUsers(data.users);
-                setFilteredUsers(data.users);
-            } catch (err) {
-                setError('Failed to fetch users');
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchUsers();
     }, []);
 
@@ -52,10 +55,24 @@ const UserManagement = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold text-orange-500">User Management</h1>
-                    <Link to="/admin" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded">
-                        Back to Admin
-                    </Link>
+                    <div>
+                        <button
+                            onClick={async () => {
+                                setUpdateMessage('Updating...');
+                                const res = await updateAllUsersProfileImages();
+                                setUpdateMessage(res.message);
+                                fetchUsers();
+                            }}
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2"
+                        >
+                            Update All Profile Images
+                        </button>
+                        <Link to="/admin" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded">
+                            Back to Admin
+                        </Link>
+                    </div>
                 </div>
+                {updateMessage && <div className="text-center p-4 my-4 bg-gray-700 text-white rounded-lg">{updateMessage}</div>}
                 <div className="relative mb-6">
                     <FiSearch className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400" />
                     <input

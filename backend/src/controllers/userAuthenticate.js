@@ -8,6 +8,7 @@ const Submission = require("../models/submission");
 const Contest = require("../models/contest");
 const Problem = require("../models/problem");
 const jwt = require("jsonwebtoken");
+const { generateProfileImage } = require('../utils/profileImageGenerator');
 
 const cloudinary = require('cloudinary').v2;
 const multer = require("multer");
@@ -65,6 +66,12 @@ const register = async (req, res) => {
             emailVerified: false, // Set emailVerified to false
         });
 
+        // Generate and set profile image
+        if (!newUser.profileImage) {
+            const imageUrl = await generateProfileImage(newUser.firstName, newUser._id);
+            newUser.profileImage = imageUrl;
+        }
+
         await newUser.save();
 
         // Generate JWT token
@@ -79,6 +86,7 @@ const register = async (req, res) => {
                 firstName: newUser.firstName,
                 emailId: newUser.emailId,
                 emailVerified: newUser.emailVerified,
+                profileImage: newUser.profileImage,
             },
             token,
         });
@@ -296,6 +304,27 @@ const getPlatformStats = async (req, res) => {
     }
 };
 
+const updateAllProfileImages = async (req, res) => {
+    try {
+        const usersWithoutImage = await User.find({ profileImage: { $in: [null, ''] } });
+        let updatedCount = 0;
+
+        for (const user of usersWithoutImage) {
+            try {
+                const imageUrl = await generateProfileImage(user.firstName, user._id);
+                await User.findByIdAndUpdate(user._id, { profileImage: imageUrl });
+                updatedCount++;
+            } catch (error) {
+                console.error(`Failed to update profile image for user: ${user.emailId}`, error);
+            }
+        }
+
+        res.status(200).json({ message: `Updated profile images for ${updatedCount} users.` });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred during the update process:', error: error.message });
+    }
+};
+
 const googleLogin = async (req, res) => {
     try {
         const { token } = req.body; // This is the access_token from the frontend
@@ -376,5 +405,6 @@ module.exports = {
     activeUsers,
     googleLogin,
     getAllUsers,
-    getPlatformStats
+    getPlatformStats,
+    updateAllProfileImages
 };
