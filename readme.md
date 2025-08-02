@@ -1,6 +1,3 @@
-Perfect! We'll go with the name **Codexa** exactly as it is — clean, modern, and brandable.
-
-Here’s your **professionally enhanced `README.md`** using **Codexa** throughout, with better structure, tone, and presentation for hackathons, open source, or recruiters:
 
 ---
 
